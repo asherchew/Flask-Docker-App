@@ -1,0 +1,36 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@2.2.0
+  docker: circleci/docker@2.1.4
+
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.12.7
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - run: |
+          echo "Installing dependencies..."
+          pip install
+
+  publish:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - docker/build:
+          image: asher96/container-assignment
+      - docker/push:
+          image: asher96/container-assignment
+
+workflows:
+  build_publish_workflow:
+    jobs:
+      - build
+      - publish:
+          requires:
+            - build
